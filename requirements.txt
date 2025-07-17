@@ -1,0 +1,7 @@
+imitation==1.0.1
+# Install gymnasium_robotics 1.4.0 from source (latest version at 07/15/2025) which requires gymnasium>=1.12.0
+git+https://github.com/Farama-Foundation/Gymnasium-Robotics.git@14163c8 # it will install gymnasium==1.12.0 with it
+# Install Mujoco 3.0+ to compat with gymnasium>=1.12.0
+mujoco==3.3.4
+# To ensure compatibility with gymnasium>=1.12.0, use the modified version(2.2.1 at 07/15.2025) of stable-baselines3: https://github.com/v-xchen-v/stable-baselines3.git
+git+https://github.com/v-xchen-v/stable-baselines3.git

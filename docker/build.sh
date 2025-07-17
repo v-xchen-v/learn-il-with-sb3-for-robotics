@@ -1,0 +1,1 @@
+sudo docker build -f Dockerfile.gpu -t sb3_il .

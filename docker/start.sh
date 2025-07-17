@@ -12,7 +12,6 @@ IMAGE_NAME=sb3_il
 docker run --gpus all -itd \
   --name $CONTAINER_NAME \
   --rm \
-#   --shm-size=16g \
   -v $(pwd):/workspace \
   $IMAGE_NAME
 

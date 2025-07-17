@@ -14,42 +14,42 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -
     bash miniconda.sh -b -p $CONDA_DIR && \
     rm miniconda.sh
 
-ENV PATH="$CONDA_DIR/bin:$PATH"
-
 # ===== Conda Env Setup =====
 ARG ENV_NAME=sb3_il
+ENV PATH="$CONDA_DIR/bin:$PATH"
+
+# Use bash as shell from this point forward
+SHELL ["/bin/bash", "-c"]
+
 RUN conda config --set channel_priority strict && \
     conda config --add channels defaults && \
     conda config --add channels https://repo.anaconda.com/pkgs/main && \
     conda config --add channels https://repo.anaconda.com/pkgs/r && \
     conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main && \
-    conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
-RUN conda create -n $ENV_NAME python=3.10 -y
-SHELL ["bash", "-c"]
-RUN echo "conda activate $ENV_NAME" >> ~/.bashrc
-RUN bash -c "source /opt/conda/etc/profile.d/conda.sh && \
-             conda activate $ENV_NAME"
+    conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r && \
+    conda create -n $ENV_NAME python=3.10 -y
+
+# Optional: auto-activate env for interactive shells
+RUN echo "source $CONDA_DIR/etc/profile.d/conda.sh" >> ~/.bashrc && \
+    echo "conda activate $ENV_NAME" >> ~/.bashrc
 
 ENV CONDA_DEFAULT_ENV=$ENV_NAME
 ENV PATH=$CONDA_DIR/envs/$ENV_NAME/bin:$PATH
 
 # ===== Install Python Dependencies =====
 RUN conda run -n sb3_il pip install --upgrade pip && \
-    conda run -n sb3_il pip install \
-        "stable-baselines3==2.2.1" 
+    conda run -n sb3_il pip install imitation==1.0.1
 
 # ===== Install Gymnasium Robotics =====
-RUN git clone https://github.com/Farama-Foundation/Gymnasium-Robotics.git /tmp/gymnasium_robotics && \
-    cd /tmp/gymnasium_robotics && \
-    conda run -n sb3_il pip install -e . && \
-    rm -rf /tmp/gymnasium_robotics
-# RUN conda run -n sb3_il pip install gymnasium_robotics
-
-# ===== Install imitation =====
-RUN conda run -n sb3_il pip install imitation
+# Install gymnasium_robotics 1.4.0 from source (latest version at 07/15/2025) which requires gymnasium>=1.12.0
+RUN conda run -n sb3_il pip install git+https://github.com/Farama-Foundation/Gymnasium-Robotics.git@14163c8 
+# it will install gymnasium==1.12.0 with it
 
 # ===== Install MuJoCo  =====
-RUN conda run -n sb3_il pip install mujoco
+RUN conda run -n sb3_il pip install mujoco==3.3.4
+
+# To ensure compatibility with gymnasium>=1.12.0, use the modified version(2.2.1 at 07/15.2025) of stable-baselines3: https://github.com/v-xchen-v/stable-baselines3.git
+RUN conda run -n sb3_il pip install git+https://github.com/v-xchen-v/stable-baselines3.git
 
 # ===== Install Additional Dependencies =====
 RUN conda run -n sb3_il pip install \
