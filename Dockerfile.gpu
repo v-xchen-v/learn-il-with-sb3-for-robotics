@@ -1,0 +1,73 @@
+# ===== Base =====
+FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu20.04
+
+# ===== Basic Setup =====
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y \
+    wget curl git sudo ffmpeg patchelf \
+    libgl1-mesa-glx libosmesa6 libglfw3 libglew-dev libegl1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# ===== Install Miniconda =====
+ENV CONDA_DIR=/opt/conda
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh && \
+    bash miniconda.sh -b -p $CONDA_DIR && \
+    rm miniconda.sh
+
+ENV PATH="$CONDA_DIR/bin:$PATH"
+
+# ===== Conda Env Setup =====
+ARG ENV_NAME=sb3_il
+RUN conda config --set channel_priority strict && \
+    conda config --add channels defaults && \
+    conda config --add channels https://repo.anaconda.com/pkgs/main && \
+    conda config --add channels https://repo.anaconda.com/pkgs/r && \
+    conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main && \
+    conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+RUN conda create -n $ENV_NAME python=3.10 -y
+SHELL ["bash", "-c"]
+RUN echo "conda activate $ENV_NAME" >> ~/.bashrc
+RUN bash -c "source /opt/conda/etc/profile.d/conda.sh && \
+             conda activate $ENV_NAME"
+
+ENV CONDA_DEFAULT_ENV=$ENV_NAME
+ENV PATH=$CONDA_DIR/envs/$ENV_NAME/bin:$PATH
+
+# ===== Install Python Dependencies =====
+RUN conda run -n sb3_il pip install --upgrade pip && \
+    conda run -n sb3_il pip install \
+        "stable-baselines3==2.2.1" 
+
+# ===== Install Gymnasium Robotics =====
+RUN git clone https://github.com/Farama-Foundation/Gymnasium-Robotics.git /tmp/gymnasium_robotics && \
+    cd /tmp/gymnasium_robotics && \
+    conda run -n sb3_il pip install -e . && \
+    rm -rf /tmp/gymnasium_robotics
+# RUN conda run -n sb3_il pip install gymnasium_robotics
+
+# ===== Install imitation =====
+RUN conda run -n sb3_il pip install imitation
+
+# ===== Install MuJoCo  =====
+RUN conda run -n sb3_il pip install mujoco
+
+# ===== Install Additional Dependencies =====
+RUN conda run -n sb3_il pip install \
+    imageio[ffmpeg] \
+    jupyterlab ipykernel tensorboard wandb \
+    matplotlib pandas tqdm
+
+# ===== Set MuJoCo Headless EGL =====
+ENV MUJOCO_GL=osmesa
+
+# # ===== Optional Render Test =====
+# COPY render_test.py /opt/render_test.py
+# RUN conda activate $ENV_NAME && \
+#     python /opt/render_test.py && \
+#     rm /opt/render_test.py
+
+# Set working directory
+WORKDIR /workspace
+
+# Launch interactive shell with activated conda env
+CMD ["/bin/bash", "-c", "source /opt/conda/etc/profile.d/conda.sh && conda activate sb3_il && bash"]
