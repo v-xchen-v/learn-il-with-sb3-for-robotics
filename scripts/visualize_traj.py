@@ -70,24 +70,24 @@ def visualize_raw_trajectories(env, traj_list, sleep_time=0.05, record=False, vi
     env.close()
 
 
-def visualize_imitation_trajectory(env, obs_array, act_array, episode_length=50, sleep_time=0.05, record=False, video_dir=None):
-    num_frames = len(obs_array)
-    num_episodes = num_frames // episode_length
+def visualize_imitation_trajectory(env, obs_array, act_array, sleep_time=0.05, record=False, video_dir=None):
+    num_episodes = len(obs_array)
     print(f"🟢 Playing {num_episodes} episodes from imitation trajectory")
 
+    env.reset(seed=SEED)  # to make sure reproducibility
     for ep in range(num_episodes):
-        start = ep * episode_length
-        end = start + episode_length
-        frames = []
-        obs, _ = env.reset()
-
+        obs_seq = obs_array[ep]
+        act_seq = act_array[ep]
         print(f"🎬 Playing imitation trajectory {ep+1}/{num_episodes}")
-        for i in range(start, end):
+        frames = []
+        
+        obs, _ = env.reset()
+        for i in range(len(obs_seq)):
             frame = env.render()
             if record:
                 frames.append(frame)
-            obs = obs_array[i]
-            action = act_array[i]
+            obs = obs_seq[1:][i]
+            action = act_seq[i]
             obs, reward, terminated, truncated, info = env.step(action)
             if terminated or truncated:
                 break
@@ -103,8 +103,7 @@ def visualize_imitation_trajectory(env, obs_array, act_array, episode_length=50,
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--env", type=str, default="FetchPickAndPlaceDense-v4", help="Environment ID")
-    parser.add_argument("--traj_path", type=str, default="expert_demos/FetchPickAndPlaceDense-v4/raw/expert_10.pkl", help="Path to trajectory file (.pkl or .npz)")
-    parser.add_argument("--episode_length", type=int, default=50, help="Step length per episode for imitation format")
+    parser.add_argument("--traj_path", type=str, default="expert_demos/FetchPickAndPlaceDense-v4/imitation/expert_10.pkl", help="Path to trajectory file (.pkl or .npz)")
     parser.add_argument("--sleep", type=float, default=0.05, help="Sleep time between steps")
     parser.add_argument("--record", action="store_true", default=True, help="Record video of the trajectory")
     parser.add_argument("--video_dir", type=str, default="data/videos/visualize_traj", help="Directory to save videos if recording is enabled")
@@ -117,12 +116,12 @@ def main():
         visualize_raw_trajectories(env, data, sleep_time=args.sleep, record=args.record, video_dir=args.video_dir)
     elif format == "imitation":
         traj_dict = {
-            "obs": np.array([step['observation'] for traj in data for step in traj.obs]),
+            "obs": np.array([traj.obs for traj in data]),
             "acts": np.array([traj.acts for traj in data]),
         }
         obs_arr = traj_dict["obs"]
         act_arr = traj_dict["acts"]
-        visualize_imitation_trajectory(env, obs_arr, act_arr, args.episode_length, sleep_time=args.sleep, record=args.record, video_dir=args.video_dir)
+        visualize_imitation_trajectory(env, obs_arr, act_arr, sleep_time=args.sleep, record=args.record, video_dir=args.video_dir)
 
 
 if __name__ == "__main__":
