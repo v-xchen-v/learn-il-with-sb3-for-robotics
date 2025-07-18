@@ -33,7 +33,7 @@ def collect_trajectories(env, model, n_episodes=100, require_success=True):
         info = {}
 
         # add init obs
-        obs_list.append(obs)
+        obs_list.append(obs['observation'])
         
         # iterate until done
         while not done:
@@ -41,7 +41,7 @@ def collect_trajectories(env, model, n_episodes=100, require_success=True):
             next_obs, reward, terminated, truncated, info = env.step(action)
             done = terminated or truncated
 
-            obs_list.append(obs)
+            obs_list.append(obs['observation'])
             act_list.append(action)
             reward_list.append(reward)
             done_list.append(done)
@@ -98,7 +98,7 @@ def main():
     parser.add_argument("--require_success", action="store_true", default=True, help="Only save successful episodes")
 
     parser.add_argument("--save_raw", type=str, default="expert_demos/FetchPickAndPlaceDense-v4/raw/expert_10.pkl", help="Path to save raw format data (.pkl)")
-    parser.add_argument("--save_imitation", type=str, default="expert_demos/FetchPickAndPlaceDense-v4/imitation/expert_10.npz", help="Path to save imitation format (.npz)")
+    parser.add_argument("--save_imitation", type=str, default="expert_demos/FetchPickAndPlaceDense-v4/imitation/expert_10.pkl", help="Path to save imitation format (.pkl)")
 
     args = parser.parse_args()
 
