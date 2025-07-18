@@ -10,8 +10,8 @@ import gymnasium
 import gymnasium.wrappers
 import types
 
-# Hack to patch missing monitoring module
-gymnasium.wrappers.monitoring = types.SimpleNamespace()
+# # Hack to patch missing monitoring module
+# gymnasium.wrappers.monitoring = types.SimpleNamespace()
 
 from stable_baselines3 import PPO, SAC, TD3
 from stable_baselines3.common.evaluation import evaluate_policy

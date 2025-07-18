@@ -6,6 +6,7 @@ import gymnasium as gym
 import gymnasium_robotics
 from stable_baselines3 import PPO, SAC, TD3
 from imitation.data.types import Trajectory
+SEED = 42 # For reproducibility, otherwise you can not visualize the same trajectory in env
 
 def load_model(model_path):
     if "ppo" in model_path.lower():
@@ -25,10 +26,13 @@ def collect_trajectories(env, model, n_episodes=100, require_success=True):
     attempt = 0
     collected = 0
 
+    env.reset(seed=SEED) # to make sure reproducibility
+    
     while collected < n_episodes:
         obs_list, act_list, reward_list, done_list, info_list = [], [], [], [], []
 
-        obs, _ = env.reset()
+        obs, _ = env.reset() # obs includes observation, target, and achieved goal
+
         done = False
         info = {}
 
@@ -98,7 +102,7 @@ def main():
     parser.add_argument("--require_success", action="store_true", default=True, help="Only save successful episodes")
 
     parser.add_argument("--save_raw", type=str, default="expert_demos/FetchPickAndPlaceDense-v4/raw/expert_10.pkl", help="Path to save raw format data (.pkl)")
-    parser.add_argument("--save_imitation", type=str, default="expert_demos/FetchPickAndPlaceDense-v4/imitation/expert_10.npz", help="Path to save imitation format (.npz)")
+    parser.add_argument("--save_imitation", type=str, default="expert_demos/FetchPickAndPlaceDense-v4/imitation/expert_10.pkl", help="Path to save imitation format (.pkl)")
 
     args = parser.parse_args()
 
