@@ -37,7 +37,7 @@ def collect_trajectories(env, model, n_episodes=100, require_success=True):
         info = {}
 
         # add init obs
-        obs_list.append(obs)
+        obs_list.append(obs['observation'])
         
         # iterate until done
         while not done:
@@ -45,7 +45,7 @@ def collect_trajectories(env, model, n_episodes=100, require_success=True):
             next_obs, reward, terminated, truncated, info = env.step(action)
             done = terminated or truncated
 
-            obs_list.append(obs)
+            obs_list.append(obs['observation'])
             act_list.append(action)
             reward_list.append(reward)
             done_list.append(done)
