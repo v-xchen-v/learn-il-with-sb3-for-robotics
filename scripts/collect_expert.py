@@ -5,7 +5,7 @@ import numpy as np
 import gymnasium as gym
 import gymnasium_robotics
 from stable_baselines3 import PPO, SAC, TD3
-
+from imitation.data.types import Trajectory
 
 def load_model(model_path):
     if "ppo" in model_path.lower():
@@ -20,7 +20,7 @@ def load_model(model_path):
 
 def collect_trajectories(env, model, n_episodes=100, require_success=True):
     raw_trajectories = []
-    imitation_obs, imitation_acts, imitation_infos = [], [], []
+    imitation_trajectories = []
 
     attempt = 0
     collected = 0
@@ -32,6 +32,10 @@ def collect_trajectories(env, model, n_episodes=100, require_success=True):
         done = False
         info = {}
 
+        # add init obs
+        obs_list.append(obs)
+        
+        # iterate until done
         while not done:
             action, _ = model.predict(obs, deterministic=True)
             next_obs, reward, terminated, truncated, info = env.step(action)
@@ -57,9 +61,13 @@ def collect_trajectories(env, model, n_episodes=100, require_success=True):
                 "info": info_list,
             })
 
-            imitation_obs.extend(obs_list)
-            imitation_acts.extend(act_list)
-            imitation_infos.extend(info_list)
+            imitation_trajectories.append(Trajectory(
+                obs=np.array(obs_list),
+                acts=np.array(act_list),
+                # reward=np.array(reward_list), # If you want to include rewards, use TrajectoryWithRew data type instead
+                infos=info_list,
+                terminal=np.array(done_list),
+            ))
         else:
             print("❌ Skipped: not successful")
 
@@ -68,13 +76,7 @@ def collect_trajectories(env, model, n_episodes=100, require_success=True):
             print("⚠️ Too many failed attempts — exiting")
             break
 
-    imitation_dict = {
-        "observations": np.array(imitation_obs),
-        "actions": np.array(imitation_acts),
-        "infos": imitation_infos,
-    }
-
-    return raw_trajectories, imitation_dict
+    return raw_trajectories, imitation_trajectories
 
 
 def save_pickle(data, path):
@@ -83,9 +85,9 @@ def save_pickle(data, path):
         pickle.dump(data, f)
 
 
-def save_npz(data_dict, path):
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    np.savez_compressed(path, **data_dict)
+# def save_npz(data_dict, path):
+#     os.makedirs(os.path.dirname(path), exist_ok=True)
+#     np.savez_compressed(path, **data_dict)
 
 
 def main():
@@ -95,8 +97,8 @@ def main():
     parser.add_argument("--n_episodes", type=int, default=10, help="Number of successful episodes to collect")
     parser.add_argument("--require_success", action="store_true", default=True, help="Only save successful episodes")
 
-    parser.add_argument("--save_raw", type=str, default="expert_demos/FetchPickAndPlaceDense-v4/expert_10.pkl", help="Path to save raw format data (.pkl)")
-    parser.add_argument("--save_imitation", type=str, default="expert_demos/FetchPickAndPlaceDense-v4/expert_10.npz", help="Path to save imitation format (.npz)")
+    parser.add_argument("--save_raw", type=str, default="expert_demos/FetchPickAndPlaceDense-v4/raw/expert_10.pkl", help="Path to save raw format data (.pkl)")
+    parser.add_argument("--save_imitation", type=str, default="expert_demos/FetchPickAndPlaceDense-v4/imitation/expert_10.npz", help="Path to save imitation format (.npz)")
 
     args = parser.parse_args()
 
@@ -119,7 +121,7 @@ def main():
         print(f"📦 Raw data saved to {args.save_raw}")
 
     if args.save_imitation:
-        save_npz(imitation_data, args.save_imitation)
+        save_pickle(imitation_data, args.save_imitation)
         print(f"📦 Imitation data saved to {args.save_imitation}")
 
 
