@@ -42,7 +42,7 @@ trained_models/
             ├── tb/
             └── config.yaml
 """
-def create_output_dir(task: str, experiment_id: str) -> dict:
+def create_output_dir(task_name: str, experiment_id: str) -> dict:
     """
     Creates and returns paths for a given experiment output folder.
 
@@ -53,7 +53,7 @@ def create_output_dir(task: str, experiment_id: str) -> dict:
     Returns:
         dict: Dictionary of key output directories.
     """
-    base = os.path.join("trained_models", task, experiment_id)
+    base = os.path.join("runs", task_name, experiment_id)
 
     paths = {
         "base": base,
