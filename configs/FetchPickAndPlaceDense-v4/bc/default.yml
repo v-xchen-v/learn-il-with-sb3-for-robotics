@@ -1,2 +1,13 @@
 env_name: FetchPickAndPlaceDense-v4
 n_epochs: 1
+
+data_source: from_local_file  # or "from_local_file"
+
+# Used only if data_source == "from_rollout"
+rollout:
+  policy_path: experts/FetchPickAndPlaceDense-v4/model_ppo.zip
+  n_episodes: 50
+  seed: 42
+
+# Used only if data_source == "from_local_file"
+expert_data_path: data/FetchPickAndPlaceDense-v4/demos.pkl

@@ -2,6 +2,7 @@
 
 import torch
 from imitation.algorithms.bc import BC
+from omegaconf import OmegaConf
 
 def save_bc_model(
     bc_trainer: BC,
@@ -24,10 +25,24 @@ def save_bc_model(
     torch.save(bc_trainer, trainer_state_path)
     print("✅ Policy and trainer saved.")
 
+def save_config(cfg, save_dir: str, filename: str = "config.yml"):
+    """
+    Saves the given OmegaConf config to a YAML file.
+
+    Args:
+        cfg (OmegaConf): The resolved config to save.
+        save_dir (str): Directory where the config will be saved.
+        filename (str): YAML file name. Default: "config.yml".
+    """
+    os.makedirs(save_dir, exist_ok=True)
+    path = os.path.join(save_dir, filename)
+    OmegaConf.save(config=cfg, f=path)
+    print(f"✅ Saved config to {path}")
+
 import os
 
 """
-trained_models/
+runs/
 └── FetchPickAndPlaceDense-v4/
     └── bc_2025-07-22_seed42/
         ├── model/
@@ -36,11 +51,20 @@ trained_models/
         │   └── policy/
         │       └── policy.pkl
         ├── eval/
-        │   ├── returns.json
-        │   └── video.mp4
+        │   ├── metrics.json
+        │   └── video_il_eval/
+        │       ├── episode_0.mp4
+        │       ├── episode_1.mp4
+        ├── replay/
+        │   ├── rollout_rl/
+        │   │   ├── episode_0.mp4
+        │   │   └── episode_1.mp4
+        │   └── replay_trajectories/
+        │       ├── demo_0.mp4
+        │       └── demo_1.mp4
         └── logs/
             ├── tb/
-            └── config.yaml
+            └── config.yml
 """
 def create_output_dir(task_name: str, experiment_id: str) -> dict:
     """
@@ -63,6 +87,9 @@ def create_output_dir(task_name: str, experiment_id: str) -> dict:
         "tb": os.path.join(base, "logs/tb"),
         "eval": os.path.join(base, "eval"),
         "config": os.path.join(base, "logs/config.yaml"),
+        "video_il_eval": os.path.join(base, "eval/video_il_eval"),
+        "video_rl_rollout": os.path.join(base, "replay/rollout_rl"),
+        "video_demo_replay": os.path.join(base, "replay/replay_trajectories"),
     }
 
     for path in paths.values():
