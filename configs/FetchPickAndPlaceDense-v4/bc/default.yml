@@ -1,7 +1,7 @@
 env_name: FetchPickAndPlaceDense-v4
 n_epochs: 1
 
-data_source: from_local_file  # or "from_local_file"
+data_source: from_local_file  # or "from_rollout"
 
 # Used only if data_source == "from_rollout"
 rollout:
@@ -10,4 +10,4 @@ rollout:
   seed: 42
 
 # Used only if data_source == "from_local_file"
-expert_data_path: data/FetchPickAndPlaceDense-v4/demos.pkl
+expert_data_path: expert_demos/FetchPickAndPlaceDense-v4/imitation_format/expert_100.pkl

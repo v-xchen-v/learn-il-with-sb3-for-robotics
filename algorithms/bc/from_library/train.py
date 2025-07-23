@@ -18,19 +18,19 @@ task = exp_config["env_name"]
 output_dirs = create_output_dir(task, experiment_id)
 n_epochs = exp_config["n_epochs"]
 data_source = exp_config["data_source"]
-if data_source == "expert_file":
+if data_source == "from_local_file":
     # Load expert data from file
     expert_data_path = exp_config["expert_data_path"]
     transitions = load_expert_data_from_file(expert_data_path)
-# elif data_source == "rollout":
-#     # Generate transitions from a rollout of an expert policy
-#     expert_path = exp_config["expert_policy_path"]
-#     transitions = generate_rollout_transitions(
-#         env_id=env_name,
-#         expert_path=expert_path,
-#         min_episodes=exp_config["rollout"]["n_episodes"],
-#         seed=exp_config["rollout"]["seed"],
-#     )
+elif data_source == "from_rollout":
+    # Generate transitions from a rollout of an expert policy
+    expert_path = exp_config["expert_policy_path"]
+    transitions = generate_rollout_transitions(
+        env_id=env_name,
+        expert_path=expert_path,
+        min_episodes=exp_config["rollout"]["n_episodes"],
+        seed=exp_config["rollout"]["seed"],
+    )
 else:
     raise ValueError(f"Unknown data source: {data_source}")
 
@@ -55,9 +55,9 @@ env = make_vec_env(
 #     seed=42,
 # )
 
-# load expert data from file
-expert_data_path = "expert_demos/FetchPickAndPlaceDense-v4/imitation_format/expert_2000.pkl"
-transitions = load_expert_data_from_file(expert_data_path)
+# # load expert data from file
+# expert_data_path = "expert_demos/FetchPickAndPlaceDense-v4/imitation_format/expert_2000.pkl"
+# transitions = load_expert_data_from_file(expert_data_path)
 
 
 rng = np.random.default_rng(seed=42)
