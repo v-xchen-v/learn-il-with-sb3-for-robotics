@@ -1,5 +1,5 @@
 defaults:
   - default  # means it loads from default.yaml in the same folder
 
-experiment_id: bc_fetchpick_01
+experiment_id: bc_fetchpick_02
 n_epochs: 10
