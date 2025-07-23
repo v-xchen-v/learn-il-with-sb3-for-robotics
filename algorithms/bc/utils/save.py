@@ -6,9 +6,9 @@ from omegaconf import OmegaConf
 
 def save_bc_model(
     bc_trainer: BC,
-    save_path: str = "models/bc_policy",
-    policy_weight_path: str = "bc_policy.pt",
-    trainer_state_path: str = "bc_trainer_full.pt",
+    save_path: str = "policy.pt",
+    policy_weight_path: str = "policy_state_dict.pt",
+    trainer_state_path: str = "trainer.pt",
 ):
     """
     Saves a trained BC policy and trainer.

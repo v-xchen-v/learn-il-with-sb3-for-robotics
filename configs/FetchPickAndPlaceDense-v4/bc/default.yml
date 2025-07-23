@@ -1,5 +1,6 @@
 env_name: FetchPickAndPlaceDense-v4
 n_epochs: 1
+batch_size: 64
 
 data_source: from_local_file  # or "from_rollout"
 
