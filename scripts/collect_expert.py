@@ -37,7 +37,7 @@ def collect_trajectories(env, model, n_episodes=100, require_success=True):
         info = {}
 
         # add init obs
-        obs_list.append(obs['observation'])
+        obs_list.append(obs)
         
         # iterate until done
         while not done:
@@ -45,7 +45,7 @@ def collect_trajectories(env, model, n_episodes=100, require_success=True):
             next_obs, reward, terminated, truncated, info = env.step(action)
             done = terminated or truncated
 
-            obs_list.append(obs['observation'])
+            obs_list.append(obs)
             act_list.append(action)
             reward_list.append(reward)
             done_list.append(done)
@@ -98,17 +98,17 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--env", type=str, default="FetchPickAndPlaceDense-v4", help="Environment ID")
     parser.add_argument("--model_path", type=str, default="experts/FetchPickAndPlaceDense-v4/model_ppo.zip", help="Trained SB3 model path")
-    parser.add_argument("--n_episodes", type=int, default=10, help="Number of successful episodes to collect")
+    parser.add_argument("--n_episodes", type=int, default=1000, help="Number of successful episodes to collect")
     parser.add_argument("--require_success", action="store_true", default=True, help="Only save successful episodes")
 
-    parser.add_argument("--save_raw", type=str, default="expert_demos/FetchPickAndPlaceDense-v4/raw/expert_10.pkl", help="Path to save raw format data (.pkl)")
-    parser.add_argument("--save_imitation", type=str, default="expert_demos/FetchPickAndPlaceDense-v4/imitation/expert_10.pkl", help="Path to save imitation format (.pkl)")
+    # parser.add_argument("--save_raw", type=str, default="expert_demos/FetchPickAndPlaceDense-v4/raw/expert_10.pkl", help="Path to save raw format data (.pkl)")
+    # parser.add_argument("--save_imitation", type=str, default="expert_demos/FetchPickAndPlaceDense-v4/imitation_format/expert_10.pkl", help="Path to save imitation format (.pkl)")
 
     args = parser.parse_args()
 
-    if not args.save_raw and not args.save_imitation:
-        print("❌ You must specify at least --save_raw or --save_imitation")
-        return
+    # if not args.save_raw and not args.save_imitation:
+    #     print("❌ You must specify at least --save_raw or --save_imitation")
+    #     return
 
     env = gym.make(args.env)
     model = load_model(args.model_path)
@@ -120,13 +120,16 @@ def main():
         require_success=args.require_success
     )
 
-    if args.save_raw:
-        save_pickle(raw_data, args.save_raw)
-        print(f"📦 Raw data saved to {args.save_raw}")
+    # if args.save_raw:
+    save_raw = f"expert_demos/{args.env}/raw/expert_{args.n_episodes}.pkl"
+    save_pickle(raw_data, save_raw)
+    print(f"📦 Raw data saved to {save_raw}")
 
-    if args.save_imitation:
-        save_pickle(imitation_data, args.save_imitation)
-        print(f"📦 Imitation data saved to {args.save_imitation}")
+    # if args.save_imitation:
+    save_imitation = f"expert_demos/{args.env}/imitation_format/expert_{args.n_episodes}.pkl"
+    save_pickle(imitation_data, save_imitation)
+    print(f"📦 Imitation data saved to {save_imitation}")
+    print("✅ Data collection complete.")
 
 
 if __name__ == "__main__":

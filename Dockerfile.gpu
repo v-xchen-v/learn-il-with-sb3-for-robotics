@@ -55,7 +55,7 @@ RUN conda run -n sb3_il pip install git+https://github.com/v-xchen-v/stable-base
 RUN conda run -n sb3_il pip install \
     imageio[ffmpeg] \
     jupyterlab ipykernel tensorboard wandb \
-    matplotlib pandas tqdm
+    matplotlib pandas tqdm omegaconf
 
 # ===== Set MuJoCo Headless EGL =====
 ENV MUJOCO_GL=osmesa
