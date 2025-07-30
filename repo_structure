@@ -1,0 +1,10 @@
+sb3-il-playground/
+├── configs/            # Training config files
+├── experts/            # Pretrained expert models
+├── data/               # Expert demonstration datasets
+├── scripts/            # Training, collection, evaluation scripts
+├── notebooks/          # (Optional) Analysis or demo notebooks
+├── utils/              # Logging, wrappers, common tools
+├── README.md
+├── requirements.txt
+└── env_setup.sh        # Optional environment bootstrap
